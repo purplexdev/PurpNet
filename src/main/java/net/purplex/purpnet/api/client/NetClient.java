@@ -5,6 +5,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import net.purplex.purpnet.api.exception.ChannelDisconnectException;
 import net.purplex.purpnet.api.handler.NetHandler;
 
 public class NetClient {
@@ -29,13 +30,19 @@ public class NetClient {
      *
      * @param handler
      */
-    public NetClient(NetHandler handler) {
+    public NetClient(final NetHandler handler) {
         instance = this;
         this.handler = handler;
     }
 
-
-    public void connect(String host, int port) throws InterruptedException {
+    /**
+     * Connect to the host and port given in as arguments
+     * Returns a ChannelFuture
+     * @param host
+     * @param port
+     * @throws InterruptedException
+     */
+    public ChannelFuture connect(final String host, final int port) throws InterruptedException {
         final EventLoopGroup group = new NioEventLoopGroup();
         final Bootstrap b = new Bootstrap();
         ChannelFuture f = b.
@@ -50,16 +57,24 @@ public class NetClient {
                 }).connect(host, port).sync();
         this.serverChannel = f.channel();
         isConnected = true;
+        return f;
     }
 
+    /**
+     * Disconnect from the current connected server
+     * Throws an exception if you are not connected to a server
+     */
     public void disconnect() {
+        final ChannelDisconnectException.ChannelDisconnectExceptionReason reason;
         if (!isConnected) {
-            System.err.println("You are not connected to a server, failed to disconnect!");
+            reason = ChannelDisconnectException.ChannelDisconnectExceptionReason.NOT_CONNECTED;
         } else if (serverChannel == null) {
-            System.err.println("The server's channel is null, failed to disconnect!");
+            reason = ChannelDisconnectException.ChannelDisconnectExceptionReason.NULL_SERVER_CHANNEL;
         } else {
             serverChannel.disconnect();
+            return;
         }
+        throw new ChannelDisconnectException(reason);
     }
 
     /**
@@ -67,27 +82,39 @@ public class NetClient {
      *
      * @param packet
      */
-    public void sendPacket(Object packet) {
+    public void sendPacket(final Object packet) {
         serverChannel.writeAndFlush(packet);
     }
 
-    public void writePacket(Object packet) {
+    /**
+     * Only writes the packet
+     *
+     * @param packet
+     */
+    public void writePacket(final Object packet) {
         serverChannel.write(packet);
     }
 
+    /**
+     * Only flushes
+     */
     public void flushPacket() {
         serverChannel.flush();
     }
 
+    /**
+     * Returning the client's instance
+     * @return
+     */
     public static NetClient getInstance() {
         return instance;
     }
 
 
     class NetClientListener extends ChannelInboundHandlerAdapter {
-        private NetClient client;
+        private final NetClient client;
 
-        NetClientListener(NetClient client) {
+        NetClientListener(final NetClient client) {
             this.client = client;
         }
 

@@ -3,7 +3,6 @@ package net.purplex.purpnet.api.server;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import net.purplex.purpnet.api.handler.NetHandler;
-import net.purplex.purpnet.utils.IDUtils;
 
 import java.util.HashSet;
 
@@ -27,20 +26,20 @@ public class NetServer {
     }
 
 
-    public void sendPacket(ServerConnectedClient client, Object packet) {
+    public void sendPacket(final ServerConnectedClient client, final Object packet) {
         client.getChannel().writeAndFlush(packet);
     }
 
-    public void writePacket(ServerConnectedClient client, Object packet) {
+    public void writePacket(final ServerConnectedClient client, final Object packet) {
         client.getChannel().write(packet);
     }
 
-    public void flushPacket(ServerConnectedClient client) {
+    public void flushPacket(final ServerConnectedClient client) {
         client.getChannel().flush();
     }
 
-    public void sendPacket(int id, Object packet) {
-        for(ServerConnectedClient client : connectedClients) {
+    public void sendPacket(final int id, Object packet) {
+        for(final ServerConnectedClient client : connectedClients) {
             if(client.getId() == id) {
                 sendPacket(client, packet);
                 return;
@@ -48,8 +47,8 @@ public class NetServer {
         }
     }
 
-    public void writePacket(int id, Object packet) {
-        for(ServerConnectedClient client : connectedClients) {
+    public void writePacket(final int id, Object packet) {
+        for(final ServerConnectedClient client : connectedClients) {
             if(client.getId() == id) {
                 writePacket(client, packet);
                 return;
@@ -57,8 +56,8 @@ public class NetServer {
         }
     }
 
-    public void flushPacket(int id) {
-        for(ServerConnectedClient client : connectedClients) {
+    public void flushPacket(final int id) {
+        for(final ServerConnectedClient client : connectedClients) {
             if(client.getId() == id) {
                 flushPacket(client);
                 return;
@@ -72,7 +71,7 @@ public class NetServer {
     }
 
     class NetServerListener extends ChannelInboundHandlerAdapter {
-        private NetServer server;
+        private final NetServer server;
         NetServerListener(NetServer server) {
             this.server = server;
         }
