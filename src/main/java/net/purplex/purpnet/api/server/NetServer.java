@@ -1,5 +1,6 @@
 package net.purplex.purpnet.api.server;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import net.purplex.purpnet.api.handler.NetHandler;
@@ -7,9 +8,10 @@ import net.purplex.purpnet.api.handler.NetHandler;
 import java.util.HashSet;
 
 public class NetServer {
+    /**
+     * Set of all current connected clients
+     */
     public HashSet<ServerConnectedClient> connectedClients = new HashSet<ServerConnectedClient>();
-
-    private static NetServer instance;
 
     private NetHandler handler;
 
@@ -17,11 +19,10 @@ public class NetServer {
      * Default constructor
      */
     public NetServer() {
-        instance = this;
+
     }
 
-    public NetServer(NetHandler handler) {
-        instance = this;
+    public NetServer(final NetHandler handler) {
         this.handler = handler;
     }
 
@@ -65,53 +66,65 @@ public class NetServer {
         }
     }
 
-
-    public static NetServer getInstance() {
-        return instance;
+    private void addClient(Channel channel) {
+        ServerConnectedClient client = new ServerConnectedClient(channel);
+        connectedClients.add(client);
     }
 
-    class NetServerListener extends ChannelInboundHandlerAdapter {
-        private final NetServer server;
-        NetServerListener(NetServer server) {
-            this.server = server;
+    private void removeClient(Channel channel) {
+        for(ServerConnectedClient client : connectedClients) {
+            if(client.getChannel().id() == channel.id()) {
+                removeClient(client);
+                return;
+            }
         }
+    }
+
+    private void removeClient(ServerConnectedClient client) {
+        connectedClients.remove(client);
+    }
+
+
+    class NetServerListener extends ChannelInboundHandlerAdapter {
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
             if (isHandlerRegistered()) {
-                server.handler.onChannelEnable(ctx.channel());
+                handler.onChannelEnable(ctx.channel());
             }
+            addClient(ctx.channel());
         }
 
         @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
             if (isHandlerRegistered()) {
-                server.handler.onChannelDisable(ctx.channel());
+                handler.onChannelDisable(ctx.channel());
             }
+            removeClient(ctx.channel());
         }
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
             if (isHandlerRegistered()) {
-                server.handler.onPacketRead(ctx.channel(), msg);
+                handler.onPacketRead(ctx.channel(), msg);
             }
         }
 
         @Override
         public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
             if (isHandlerRegistered()) {
-                server.handler.onPacketReadSuccess(ctx.channel());
+                handler.onPacketReadSuccess(ctx.channel());
             }
         }
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
             if (isHandlerRegistered()) {
-                server.handler.onExceptionCaught(ctx.channel(), cause);
+                handler.onExceptionCaught(ctx.channel(), cause);
             }
         }
 
         public boolean isHandlerRegistered() {
-            return server != null && server.handler != null;
+            return handler != null;
         }
     }
 
