@@ -7,9 +7,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import net.purplex.purpnet.api.client.listener.NetClientHandler;
 
-/**
- * Instance of your client
- */
 public class NetClient {
 
     private static NetClient instance;
@@ -27,6 +24,11 @@ public class NetClient {
         instance = this;
     }
 
+    /**
+     * Constructor with a registered packet listener
+     *
+     * @param handler
+     */
     public NetClient(NetClientHandler handler) {
         instance = this;
         this.handler = handler;
@@ -40,30 +42,41 @@ public class NetClient {
                 group(group).
                 channel(NioSocketChannel.class).
                 handler(new ChannelInitializer<SocketChannel>() {
-            @Override
-            protected void initChannel(SocketChannel ch) throws Exception {
-                final ChannelPipeline pipeline = ch.pipeline();
-                pipeline.addLast(new NetClientListener(NetClient.getInstance()));
-            }
-        }).connect(host, port).sync();
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        final ChannelPipeline pipeline = ch.pipeline();
+                        pipeline.addLast(new NetClientListener(NetClient.getInstance()));
+                    }
+                }).connect(host, port).sync();
         this.serverChannel = f.channel();
         isConnected = true;
     }
 
     public void disconnect() {
-        if(!isConnected) {
+        if (!isConnected) {
             System.err.println("You are not connected to a server, failed to disconnect!");
-        }
-        else if(serverChannel == null) {
+        } else if (serverChannel == null) {
             System.err.println("The server's channel is null, failed to disconnect!");
-        }
-        else  {
+        } else {
             serverChannel.disconnect();
         }
     }
 
+    /**
+     * Writes and flushes a packet
+     *
+     * @param packet
+     */
     public void sendPacket(Object packet) {
         serverChannel.writeAndFlush(packet);
+    }
+
+    public void writePacket(Object packet) {
+        serverChannel.write(packet);
+    }
+
+    public void flushPacket() {
+        serverChannel.flush();
     }
 
     public static NetClient getInstance() {
