@@ -5,13 +5,13 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import net.purplex.purpnet.api.client.listener.NetClientHandler;
+import net.purplex.purpnet.api.handler.NetHandler;
 
 public class NetClient {
 
     private static NetClient instance;
 
-    private NetClientHandler handler;
+    private NetHandler handler;
 
     private Channel serverChannel;
 
@@ -29,7 +29,7 @@ public class NetClient {
      *
      * @param handler
      */
-    public NetClient(NetClientHandler handler) {
+    public NetClient(NetHandler handler) {
         instance = this;
         this.handler = handler;
     }
@@ -87,7 +87,7 @@ public class NetClient {
     class NetClientListener extends ChannelInboundHandlerAdapter {
         private NetClient client;
 
-        public NetClientListener(NetClient client) {
+        NetClientListener(NetClient client) {
             this.client = client;
         }
 

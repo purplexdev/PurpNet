@@ -26,6 +26,4 @@ public class IDUtils {
     private static int generateNumberInRange(int min, int max) {
         return (int) (Math.random() * (max - min)) + min;
     }
-
-
 }

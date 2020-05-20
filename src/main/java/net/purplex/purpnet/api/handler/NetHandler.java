@@ -1,8 +1,8 @@
-package net.purplex.purpnet.api.client.listener;
+package net.purplex.purpnet.api.handler;
 
 import io.netty.channel.Channel;
 
-public abstract class NetClientHandler {
+public abstract class NetHandler {
     public abstract void onChannelEnable(Channel serverChannel);
 
     public abstract void onChannelDisable(Channel serverChannel);
