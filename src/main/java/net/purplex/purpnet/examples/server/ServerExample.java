@@ -10,7 +10,7 @@ public class ServerExample {
         netServer = new NetServer(new ServerHandler());
 
         while(netServer.connectedClients.size() == 0) {
-            break;
+            ;
         }
 
         //atleast one client has connected
@@ -18,8 +18,9 @@ public class ServerExample {
             ByteBuf buf = Unpooled.directBuffer();
             byte[] bytes = "hello".getBytes();
             buf.writeBytes(bytes);
-            netServer.sendPacket(1, buf);
-            netServer.sendPacketToAll(buf);
+
+            netServer.sendPacket(0, buf); //send to id 0
+            netServer.sendPacketToAll(buf); //send to all
 
 
         }
