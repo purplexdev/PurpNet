@@ -1,4 +1,4 @@
-package net.purplex.purpnet.client.listener;
+package net.purplex.purpnet.api.client.listener;
 
 import io.netty.channel.Channel;
 
