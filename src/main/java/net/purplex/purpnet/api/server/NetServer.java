@@ -99,6 +99,16 @@ public class NetServer {
         }
     }
 
+    /**
+     * Writes and flushes the packet to all connected clients
+     * @param packet
+     */
+    public void sendPacketToAll(Object packet) {
+        for(final ServerConnectedClient client : connectedClients) {
+            sendPacket(client, packet);
+        }
+    }
+
     private void addClient(Channel channel) {
         ServerConnectedClient client = new ServerConnectedClient(channel);
         connectedClients.add(client);
@@ -156,7 +166,7 @@ public class NetServer {
             }
         }
 
-        public boolean isHandlerRegistered() {
+        private boolean isHandlerRegistered() {
             return handler != null;
         }
     }

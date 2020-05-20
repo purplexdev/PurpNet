@@ -35,4 +35,8 @@ public class ServerConnectedClient {
     public Channel getChannel() {
         return channel;
     }
+
+    public void disconnect() {
+        channel.disconnect();
+    }
 }
