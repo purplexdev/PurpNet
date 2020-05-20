@@ -23,7 +23,7 @@ public class NetClient {
     }
 
     /**
-     * Constructor with a registered packet listener
+     * Constructor with a registered NetHandler
      *
      * @param handler
      */
