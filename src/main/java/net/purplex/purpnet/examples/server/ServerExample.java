@@ -5,29 +5,35 @@ import io.netty.buffer.Unpooled;
 import net.purplex.purpnet.api.server.NetServer;
 
 public class ServerExample {
+
+    private static long lastTime;
+
     public static NetServer netServer;
+
     public static void main(String[] args) {
+        //register the serverhandler, used for listening to packets
         netServer = new NetServer(new ServerHandler());
 
-        while(netServer.connectedClients.size() == 0) {
-            ;
+        while (netServer.connectedClients.size() == 0) {
+            System.out.println("no one has connected");
         }
 
         //atleast one client has connected
-        while(true) {
+        while (hasOneSecondPassed()) {
             ByteBuf buf = Unpooled.directBuffer();
             byte[] bytes = "hello".getBytes();
             buf.writeBytes(bytes);
-
-            netServer.sendPacket(0, buf); //send to id 0
+            //send the packet to all
             netServer.sendPacketToAll(buf); //send to all
-
-
         }
     }
 
-    @Deprecated
-    private static void eat() {
-
+    private static boolean hasOneSecondPassed() {
+        final long curTime = System.currentTimeMillis();
+        if(curTime - lastTime >= 1000L) {
+            lastTime = curTime;
+            return true;
+        }
+        return false;
     }
 }
